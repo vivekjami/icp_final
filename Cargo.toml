@@ -1,0 +1,5 @@
+[workspace]
+members = [
+    "src/icp_final_backend"
+]
+resolver = "2"
