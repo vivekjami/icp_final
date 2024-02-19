@@ -1,3 +1,208 @@
-service : {
-    "greet": (text) -> (text) query;
+type Main = 
+    record {
+        temp: float64;
+        feels_like: float64;
+        temp_min: float64;
+        temp_max: float64;
+        pressure: float64;
+        humidity: float64;
+    };
+type Condition =
+    record{
+        id: float64;
+        main: text;
+        description:text
+    };
+
+type Wind =
+    record{
+        speed: float64;
+        deg:float64
+    };
+
+type Weather =
+    record{
+        main: Main;
+        weather:vec Condition;
+        wind: Wind;
+    };
+type Result = 
+    variant {
+        Ok: Weather;
+        Err: text;
+    };
+type ConstrainedError = variant {
+    Unauthorized;
+    CityNotFound;
+    WeatherConditionNotMatched;
+    NoSuchWeatherCondition;
+};
+
+
+type OwnerResult = variant {
+    Err : ApiError;
+    Ok : principal;
+};
+type ApiError = variant {
+    Unauthorized;
+    InvalidTokenId;
+    ZeroAddress;
+    Other;
+};
+type TxReceipt = variant {
+    Ok : nat;
+    Err : ApiError;
+};
+type InterfaceId = variant {
+    Approval;
+    TransactionHistory;
+    Mint;
+    Burn;
+    TransferNotification;
+};
+type LogoResult = record {
+    logo_type : text;
+    data : text;
+};
+type ExtendedMetadataResult = record {
+    metadata_desc : MetadataDesc;
+    token_id : nat64;
+};
+type MetadataResult = variant {
+    Ok : MetadataDesc;
+    Err : ApiError;
+};
+type MetadataDesc = vec MetadataPart;
+type MetadataPart = record {
+    purpose : MetadataPurpose;
+    key_val_data : vec MetadataKeyVal;
+    data : blob;
+    city: text;
+    weather_condition: WeatherCondition;
+};
+type WeatherCondition = variant{
+    Thunderstorm;
+    Drizzle;
+    Rain;
+    Snow;
+    Atmosphere;
+    Clear;
+    Clouds;
+};
+type MetadataPurpose = variant {
+    Preview;
+    Rendered;
+};
+type MetadataKeyVal = record {
+    text;
+    MetadataVal;
+};
+type MetadataVal = variant {
+    TextContent : text;
+    BlobContent : blob;
+    NatContent : nat;
+    Nat8Content : nat8;
+    Nat16Content : nat16;
+    Nat32Content : nat32;
+    Nat64Content : nat64;
+};
+type TxResult = record { // ???
+    fee : nat;
+    transaction_type : TransactionType;
+};
+type TransactionType = variant {
+    Transfer : record {
+        token_id : nat64;
+        from : principal;
+        to : principal;
+    };
+    TransferFrom : record {
+        token_id : nat64;
+        from : principal;
+        to : principal;
+    };
+    Approve : record {
+        token_id : nat64;
+        from : principal;
+        to : principal;
+    };
+    SetApprovalForAll : record {
+        from : principal;
+        to : principal;
+    };
+    Mint : record {
+        token_id : nat64;
+    };
+    Burn : record {
+        token_id : nat64;
+    };
+};
+
+type MintReceipt = variant {
+    Err : ConstrainedError;
+    Ok : record {
+        token_id : nat64;
+        id : nat;
+    };
+};
+
+type BurnRequest = record {
+    token_id : nat64;
+};
+
+type InitArgs = record {
+    custodians : opt vec principal;
+    logo : opt LogoResult;
+    name : text;
+    symbol : text;
+};
+
+type ManageResult = variant {
+    Ok;
+    Err : ApiError;
+};
+
+type HttpRequest = record {
+    method : text;
+    url : text;
+    headers : vec record { text; text; };
+    body : blob;
+};
+
+type HttpResponse = record {
+    status_code : nat16;
+    headers : vec record { text; text; };
+    body : blob;
+};
+
+service : (InitArgs) -> {
+    balanceOfDip721 : (user : principal) -> (nat64) query;
+    ownerOfDip721 : (token_id : nat64) -> (OwnerResult) query;
+    safeTransferFromDip721 : (from : principal, to : principal, token_id : nat64) -> (TxReceipt);
+    transferFromDip721 : (from : principal, to : principal, token_id : nat64) -> (TxReceipt);
+    supportedInterfacesDip721 : () -> (vec InterfaceId) query;
+    logoDip721 : () -> (LogoResult) query;
+    nameDip721 : () -> (text) query;
+    symbolDip721 : () -> (text) query;
+    totalSupplyDip721 : () -> (nat64) query;
+    getMetadataDip721 : (token_id : nat64) -> (MetadataResult) query;
+    getMetadataForUserDip721 : (user : principal) -> (vec ExtendedMetadataResult); 
+    safeTransferFromNotifyDip721 : (from : principal, to : principal, token_id : nat64, data : vec nat8) -> (TxReceipt);
+    transferFromNotifyDip721 : (from : principal, to : principal, token_id : nat64, data : vec nat8) -> (TxReceipt);
+    approveDip721 : (user : principal, token_id : nat64) -> (TxReceipt) /*query*/;
+    setApprovalForAllDip721 : (operator : principal, isApproved : bool) -> (TxReceipt);
+    getApprovedDip721 : (token_id : nat64) -> (TxReceipt) query;
+    isApprovedForAllDip721 : (operator : principal) -> (bool) query;
+    mintDip721 : (principal_data : text, city : text, weather_condition : text) -> (MintReceipt);
+    burnDip721 : (token_id : nat64) -> (TxReceipt);
+    getCity : (token_id : nat64) -> (text) query;
+    getWeatherCondition : (token_id : nat64) -> (text) query;
+
+    set_name : (name : text) -> (ManageResult);
+    set_symbol : (sym : text) -> (ManageResult);
+    set_logo : (logo : opt LogoResult) -> (ManageResult);
+    set_custodian : (user : principal, custodian : bool) -> (ManageResult);
+    is_custodian : (principal) -> (bool) query;
+    http_request : (HttpRequest) -> (HttpResponse) query;
+    get_weather_by_city_name : (text) -> (Result) ;
 }

@@ -9,6 +9,17 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-candid = "0.10"
-ic-cdk = "0.12"
-ic-cdk-timers = "0.6" # Feel free to remove this dependency if you don't need timers
+candid = "0.8"
+ic-cdk = "0.7"
+ic-cdk-timers = "0.1" # Feel free to remove this dependency if you don't need timers
+ic-stable-structures = "0.5.4"
+serde = "1.0.132"
+ic-cdk-macros = "0.8.1"
+serde_json = "1.0.93"
+include-base64 = "0.1"
+percent-encoding = "2.1"
+ic-certified-map = "0.3"
+sha2 = "0.10.2"
+serde_cbor = "0.11.2"
+base64 = "0.13.0"
+blob = "0.3.0"
